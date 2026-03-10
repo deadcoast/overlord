@@ -1,2 +1,3 @@
 # Ignore the .depreciated directory
 .depreciated/
+.user_notes/

@@ -1,0 +1,353 @@
+overlord:
+  runtime_contract:
+    protocol_id: OVERLORD
+    protocol_version: 3.0.0
+    audience: agent_runtime_only
+    invocation_context: repository_root
+    repository_root_required: true
+    mode: yaml_canonical
+    parse_strategy: strict_top_to_bottom
+    parse_sections_in_order:
+      - runtime_contract
+      - file_role_authority_map
+      - truth_precedence
+      - execution_contract
+      - lok_contract
+      - record_schemas
+      - source_and_inference_policy
+      - validation_contract
+      - scaling_contract
+      - change_control
+      - last_parse_retention_priority
+    optimize_for:
+      - context_precision
+      - retrieval_efficiency
+      - traceability
+      - update_consistency
+    reject_if:
+      - section_missing
+      - invalid_schema_fields
+      - unresolved_authority_conflict
+
+  file_role_authority_map:
+    - path: OVERLORD.yaml
+      role: root_operational_protocol
+      class: governance
+      authority: highest
+      writable: true
+      canonical: true
+    - path: OVERLORD.md
+      role: markdown_mirror
+      class: mirror
+      authority: low
+      writable: true
+      canonical: false
+    - path: OVERLORD/OVERLORDv0.0.1.md
+      role: design_intent_reference
+      class: reference
+      authority: advisory
+      writable: true
+      canonical: false
+    - path: OVERLORD/OVERLORD-REVISIONS.md
+      role: design_hardening_reference
+      class: reference
+      authority: advisory
+      writable: true
+      canonical: false
+    - path: Research-Paper/selective_ideal.md
+      role: formal_research_baseline
+      class: canonical_research
+      authority: high
+      writable: true
+      canonical: true
+    - path: Research-Paper/selective_ideal.docx
+      role: mirror_artifact
+      class: mirror
+      authority: low
+      writable: true
+      canonical: false
+    - path: patterns/patterns-in-politicsv0.0.1.md
+      role: rudimentary_method_demo
+      class: prototype_demo
+      authority: non_canonical
+      writable: true
+      canonical: false
+    - path: patterns/patterns-in-politicsv0.0.2.md
+      role: prior_translation_attempt
+      class: translation_artifact
+      authority: non_canonical
+      writable: true
+      canonical: false
+    - path: patterns/patterns-in-politicsv0.0.3.yaml
+      role: yaml_translation_example
+      class: translation_artifact
+      authority: non_canonical
+      writable: true
+      canonical: false
+    - path: notes/notes.md
+      role: brainstorming_input
+      class: notes
+      authority: non_canonical
+      writable: true
+      canonical: false
+    - path: notes/author.md
+      role: author_context
+      class: notes
+      authority: non_canonical
+      writable: true
+      canonical: false
+    - path: .depreciated/*
+      role: archive
+      class: historical
+      authority: lowest
+      writable: true
+      canonical: false
+
+  truth_precedence:
+    ranking:
+      - rank: 1
+        source: explicit_user_instruction_current_session
+      - rank: 2
+        source: OVERLORD.yaml
+      - rank: 3
+        source: canonical_research_documents
+      - rank: 4
+        source: non_canonical_support_documents
+      - rank: 5
+        source: associative_inference
+    conflict_resolution:
+      if_rank_conflict: choose_lower_rank_number
+      if_same_rank_conflict: mark_unresolved_and_stop
+
+  execution_contract:
+    request_classification:
+      required_fields:
+        - request_id
+        - request_type
+        - target_files
+        - target_authority_class
+        - expected_output_type
+    request_type_enum:
+      - review
+      - transform
+      - link
+      - normalize
+      - update
+      - validate
+    hard_behavior:
+      - never_promote_non_canonical_to_canonical_without_explicit_instruction
+      - never_invent_records_or_sources
+      - never_silently_overwrite_conflicting_claims
+      - always_emit_status_for_each_record
+    stop_conditions:
+      - missing_target_file
+      - authority_conflict
+      - unresolved_schema_violation
+
+  lok_contract:
+    lok_1_task_alignment:
+      required_fields:
+        - task_id
+        - task_statement
+        - active_scope_files
+        - required_data
+        - constraints
+        - output_contract
+    lok_2_navigation_context:
+      required_fields:
+        - references
+        - links
+        - mentions
+      mentions_required_fields:
+        - direct
+        - associative
+    lok_3_canonical_record:
+      required_fields:
+        - record_id
+        - record_type
+        - definition
+        - source_of_truth
+        - status
+        - revision_ref
+
+  record_schemas:
+    id_patterns:
+      doc_id: ^[A-Z0-9][A-Z0-9-]{2,80}$
+      task_id: ^TASK-[A-Z0-9-]{2,80}$
+      record_id: ^[A-Z0-9][A-Z0-9:-]{1,80}$
+      evidence_id: ^EV-[A-Z0-9-]{2,80}$
+      link_id: ^LNK-[A-Z0-9-]{2,80}$
+
+    doc_meta:
+      required_fields:
+        - doc_id
+        - title
+        - doc_class
+        - authority_level
+        - canonical_source
+        - status
+        - maintained_by
+        - last_updated
+
+    claim_record:
+      required_fields:
+        - record_id
+        - title
+        - claim_type
+        - canonicality
+        - statement
+        - evidence_ids
+        - source_of_truth
+        - mentions
+        - status
+        - revision
+      claim_type_enum:
+        - thesis
+        - subclaim
+        - stance
+        - formula
+        - counterpoint
+        - todo
+      canonicality_enum:
+        - canonical
+        - non_canonical
+
+    evidence_record:
+      required_fields:
+        - evidence_id
+        - claim_links
+        - source_type
+        - citation
+        - source_url
+        - extraction_note
+        - verification_state
+        - status
+      source_type_enum:
+        - primary
+        - secondary
+        - tertiary
+        - opinion
+        - dataset
+        - historical_doc
+      verification_state_enum:
+        - verified
+        - unverified
+        - contested
+
+    link_record:
+      required_fields:
+        - link_id
+        - from_record
+        - to_record
+        - link_type
+        - rationale
+        - status
+      link_type_enum:
+        - supports
+        - contrasts
+        - depends_on
+        - defines
+        - mentions_direct
+        - mentions_associative
+
+    status_enum:
+      - draft
+      - partial
+      - stable
+      - deprecated
+      - unresolved
+
+  source_and_inference_policy:
+    source_tiers:
+      tier_a:
+        - peer_reviewed
+        - primary_documents
+        - direct_datasets
+      tier_b:
+        - high_quality_secondary_analysis
+      tier_c:
+        - opinion_and_tertiary_content
+
+    promotion_rules:
+      canonical_stable_requires:
+        one_of:
+          - one_tier_a_evidence
+          - two_independent_tier_b_evidence
+      tier_c_only:
+        max_status: partial
+
+    inference_rules:
+      allowed:
+        - structural_inference_from_explicit_text
+        - direct_link_extraction_from_explicit_references
+        - associative_link_extraction_with_non_canonical_label
+      disallowed:
+        - unsupported_claim_creation
+        - source_fabrication
+        - canonical_promotion_from_association_only
+
+  validation_contract:
+    required_pass_checks:
+      - no_fabricated_sources
+      - no_dangling_record_id
+      - no_missing_status
+      - no_missing_source_of_truth_in_claim_records
+      - mention_split_present_direct_and_associative
+      - authority_map_respected
+      - truth_precedence_respected
+    fail_action:
+      - mark_record_unresolved
+      - emit_gap_record
+      - stop_write_for_canonical_targets
+
+  scaling_contract:
+    activate_when:
+      - record_count_gt_250
+      - source_count_gt_500
+      - cross_doc_links_gt_1000
+    sharding_targets:
+      - INDEX/claims.md
+      - INDEX/evidence.md
+      - INDEX/links.md
+      - INDEX/tasks.md
+      - INDEX/revisions.md
+    shard_rules:
+      - keep_full_schema_shape
+      - keep_record_ids_stable
+      - store_pointer_to_origin_file_and_anchor
+
+  change_control:
+    protocol_change_requirements:
+      - increment_protocol_version
+      - include_change_summary_block
+      - include_breaking_change_flag
+    breaking_change_requirements:
+      - include_migration_steps
+      - preserve_backward_id_mapping
+    id_mutation_policy:
+      - ids_immutable
+      - use_deprecate_and_replace_not_rename
+
+  last_parse_retention_priority:
+    retention_weight: highest
+    parse_position: final_section
+    principle: continuous_design_refinement_is_mandatory
+    rule_chain:
+      - comprehensive_philosophy_requires_comprehensive_research
+      - comprehensive_research_requires_comprehensive_organization_and_planning
+      - comprehensive_organization_and_planning_requires_comprehensive_documentation
+      - comprehensive_documentation_requires_optimized_agent_first_formats
+      - optimized_agent_first_formats_require_continuous_refinement
+    refinement_loop:
+      required_inputs:
+        - what_worked
+        - what_failed
+        - retrieval_failures
+        - ambiguity_events
+        - unresolved_growth_trends
+      required_outputs:
+        - proposed_spec_change
+        - one_file_translation_test
+        - measured_delta_before_vs_after
+        - keep_or_revert_decision
+    never_terminal: true
